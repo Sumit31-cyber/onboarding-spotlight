@@ -79,8 +79,8 @@ const transformations: Record<TransformationIndex, TransformationState> = {
   },
   4: {
     perspective: 1000,
-    rotateX: -5,
-    rotateY: 0,
+    rotateX: -8,
+    rotateY: 10,
   },
   5: {
     perspective: 1000,
