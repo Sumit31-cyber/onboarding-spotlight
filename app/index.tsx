@@ -1,17 +1,11 @@
-import React, { useCallback, useMemo, useState } from "react";
-import { Dimensions, SafeAreaView, StyleSheet, Text, View } from "react-native";
-// import {
-//   _horizontalPadding,
-//   _windowHeight,
-//   _windowWidth,
-//   FONTS,
-//   WINDOW_HEIGHT,
-//   WINDOW_WIDTH,
-// } from "@/utils/constant";
+import { Spotlight } from "@/components/spotlight";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { Image } from "expo-image";
 import { ArrowRight } from "lucide-react-native";
+import React, { useCallback, useMemo, useState } from "react";
+import { Dimensions, StyleSheet, Text, View } from "react-native";
 import Animated, {
+  Easing,
   Extrapolation,
   FadeIn,
   FadeOut,
@@ -25,6 +19,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { RFValue } from "react-native-responsive-fontsize";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface TransformationState {
   perspective: number;
@@ -59,7 +54,7 @@ const CARD_HEIGHT = WINDOW_HEIGHT * 0.6;
 const CARD_WIDTH = WINDOW_WIDTH * 0.88;
 export const _horizontalPadding = WINDOW_WIDTH * 0.03;
 
-const PRIMARY_COLOR = "#FA5622";
+export const PRIMARY_COLOR = "#FA5622";
 
 const transformations: Record<TransformationIndex, TransformationState> = {
   0: {
@@ -103,26 +98,26 @@ const positions: Record<PositionIndex, AbsolutePositionState> = {
   1: {
     translateX: 0,
     translateY: CARD_HEIGHT * 0.4,
-    size: 700,
+    size: 400,
   },
   2: {
     translateX: -CARD_WIDTH * 0.4,
-    translateY: -CARD_HEIGHT * 0.5,
-    size: 400,
+    translateY: -CARD_HEIGHT * 0.48,
+    size: 280,
   },
   3: {
     translateX: CARD_WIDTH * 0.4,
     translateY: -CARD_HEIGHT * 0.5,
-    size: 500,
+    size: 300,
   },
   4: {
-    translateX: -CARD_WIDTH * 0.4,
+    translateX: -CARD_WIDTH * 0.35,
     translateY: -CARD_HEIGHT * 0.15,
-    size: 800,
+    size: 360,
   },
   5: {
-    translateX: 0,
-    translateY: 0,
+    translateX: CARD_HEIGHT / 2,
+    translateY: CARD_WIDTH / 2,
     size: 800,
   },
 };
@@ -144,12 +139,11 @@ const defaultScrollViewData: ScrollViewDataItem[] = [
   },
   {
     title: "Header Field",
-    description:
-      "Show related information at the top of your pass - always visible in your Apple Wallet",
+    description: `Show related information at the top of your ${"\n"}pass - always visible in your Apple Wallet`,
   },
   {
     title: "Primary and Secondary Fields",
-    description: "Show more information on your pass, more prominently.",
+    description: `Show more information on your pass,${"\n"}more prominently.`,
   },
   {
     title: "You're All Set!",
@@ -161,10 +155,11 @@ const OnboardingComponent: React.FC<OnboardingProps> = ({
   cardData = {
     membershipNumber: "472284927",
     memberName: "Alex Wilson",
-    joiningDate: "28 July 2025",
+    joiningDate: "14 Feb 2026",
   },
 }) => {
   const [activeIndex, setActiveIndex] = useState<number>(0);
+  const step = useSharedValue(0);
 
   // Shared values for animations
   const rotateX = useSharedValue(0);
@@ -173,26 +168,34 @@ const OnboardingComponent: React.FC<OnboardingProps> = ({
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const perspective = useSharedValue(1000);
+  const spotlightOpacity = useSharedValue(0);
 
   // Memoized animation configs
+
   const springConfig = useMemo(
     () => ({
-      damping: 15,
-      stiffness: 100,
+      damping: 25,
+      stiffness: 120,
+      // mass: 0.5,
+      // overshootClamping: true,
+      // restDisplacementThreshold: 0.5,
+      // restSpeedThreshold: 0.5,
     }),
     [],
   );
 
   const timingConfig = useMemo(
     () => ({
-      duration: 400,
+      duration: 450,
+      easing: Easing.out(Easing.cubic),
     }),
     [],
   );
 
   const spotlightTimingConfig = useMemo(
     () => ({
-      duration: 300,
+      duration: 380,
+      easing: Easing.out(Easing.cubic),
     }),
     [],
   );
@@ -224,6 +227,10 @@ const OnboardingComponent: React.FC<OnboardingProps> = ({
       spotlightSize.value = withTiming(current.size, spotlightTimingConfig);
       translateX.value = withSpring(current.translateX, springConfig);
       translateY.value = withSpring(current.translateY, springConfig);
+      spotlightOpacity.value = withTiming(
+        activeIndex === 0 ? 0 : activeIndex === 5 ? 0 : 1,
+        timingConfig,
+      );
     }
 
     return {
@@ -237,9 +244,13 @@ const OnboardingComponent: React.FC<OnboardingProps> = ({
   }, [activeIndex, springConfig, spotlightTimingConfig]);
 
   // Handle scroll index change
-  const handleIndexChange = useCallback((newIndex: number) => {
-    setActiveIndex(newIndex);
-  }, []);
+  const handleIndexChange = useCallback(
+    (newIndex: number) => {
+      setActiveIndex(newIndex);
+      step.value = newIndex;
+    },
+    [step],
+  );
 
   // Scroll handler
   const scrollHandler = useAnimatedScrollHandler(
@@ -326,6 +337,13 @@ const OnboardingComponent: React.FC<OnboardingProps> = ({
 
       {/* Animated card */}
       <Animated.View style={[cardRotationStyle, styles.animatedCard]}>
+        {/* <View style={[StyleSheet.absoluteFill, {}]}>
+          <HolographicCard
+            height={CARD_HEIGHT}
+            width={CARD_WIDTH}
+            step={step}
+          />
+        </View> */}
         {/* Spotlight overlay */}
         <Animated.View
           entering={FadeIn.duration(300)}
@@ -345,11 +363,15 @@ const OnboardingComponent: React.FC<OnboardingProps> = ({
                     <Animated.View
                       style={[spotlightPositionStyle, styles.spotlightImage]}
                     >
-                      <Image
+                      <Spotlight
+                        spotlightSize={spotlightSize}
+                        opacity={spotlightOpacity}
+                      />
+                      {/* <Image
                         style={styles.fullSize}
                         source={require("@/assets/images/spotlight.png")}
                         contentFit="contain"
-                      />
+                      /> */}
                     </Animated.View>
                   </View>
                 }
@@ -390,9 +412,9 @@ const OnboardingComponent: React.FC<OnboardingProps> = ({
           {/* QR Code */}
           <View style={styles.qrContainer}>
             <Image
-              contentFit="contain"
+              contentFit="fill"
               style={styles.qrCode}
-              source={require("@/assets/images/qr.jpg")}
+              source={require("@/assets/images/qr.png")}
             />
           </View>
         </View>
@@ -472,20 +494,23 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   pageIndicator: {
-    // fontFamily: FONTS.poppinsRegular,
-    color: "#C8C6C8",
     fontSize: RFValue(10),
+    opacity: 0.6,
+    fontFamily: "regular",
+    position: "absolute",
+    right: _horizontalPadding,
   },
   scrollView: {
     flex: 1,
   },
   scrollPage: {
     width: WINDOW_WIDTH,
-    padding: _horizontalPadding,
+    paddingHorizontal: _horizontalPadding,
     justifyContent: "flex-start",
   },
   textContainer: {
-    maxWidth: WINDOW_WIDTH * 0.9,
+    maxWidth: CARD_WIDTH,
+    padding: _horizontalPadding,
     gap: 10,
   },
   title: {
@@ -578,13 +603,13 @@ const styles = StyleSheet.create({
   },
   memberName: {
     fontFamily: "regular",
-    fontSize: RFValue(30),
-    color: "white",
+    fontSize: RFValue(38),
+    color: "#fcffff",
   },
   nameLabel: {
     fontFamily: "regular",
     fontSize: RFValue(10),
-    color: "white",
+    color: "#fcffff",
     marginTop: -5,
   },
   dateSection: {
@@ -605,10 +630,14 @@ const styles = StyleSheet.create({
   qrContainer: {
     alignSelf: "center",
     marginTop: "auto",
+    borderRadius: RFValue(4),
+    overflow: "hidden",
+    backgroundColor: "white",
+    height: RFValue(90),
+    width: RFValue(90),
   },
   qrCode: {
-    height: RFValue(100),
-    width: RFValue(100),
+    flex: 1,
   },
   stepIndicatorContainer: {
     height: RFValue(30),
