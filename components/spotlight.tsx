@@ -36,7 +36,7 @@ export const Spotlight: FC<Props> = ({ spotlightSize, opacity }) => {
         <RadialGradient
           c={center}
           r={radius}
-          colors={["#FFFFFF", "transparent"]}
+          colors={["rgba(0,0,0,1)", "rgba(0,0,0,0.8)", "transparent"]}
         />
       </RoundedRect>
     </Canvas>

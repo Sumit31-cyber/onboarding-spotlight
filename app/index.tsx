@@ -635,6 +635,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     height: RFValue(90),
     width: RFValue(90),
+    marginBottom: RFValue(12),
   },
   qrCode: {
     flex: 1,
