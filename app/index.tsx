@@ -337,13 +337,6 @@ const OnboardingComponent: React.FC<OnboardingProps> = ({
 
       {/* Animated card */}
       <Animated.View style={[cardRotationStyle, styles.animatedCard]}>
-        {/* <View style={[StyleSheet.absoluteFill, {}]}>
-          <HolographicCard
-            height={CARD_HEIGHT}
-            width={CARD_WIDTH}
-            step={step}
-          />
-        </View> */}
         {/* Spotlight overlay */}
         <Animated.View
           entering={FadeIn.duration(300)}
@@ -367,11 +360,6 @@ const OnboardingComponent: React.FC<OnboardingProps> = ({
                         spotlightSize={spotlightSize}
                         opacity={spotlightOpacity}
                       />
-                      {/* <Image
-                        style={styles.fullSize}
-                        source={require("@/assets/images/spotlight.png")}
-                        contentFit="contain"
-                      /> */}
                     </Animated.View>
                   </View>
                 }
@@ -522,7 +510,6 @@ const styles = StyleSheet.create({
     fontFamily: "regular",
     fontSize: RFValue(10),
     letterSpacing: 0.6,
-    // color: "#8E8C8F",
     lineHeight: RFValue(14),
     opacity: 0.7,
   },
@@ -530,7 +517,7 @@ const styles = StyleSheet.create({
     height: CARD_HEIGHT,
     width: CARD_WIDTH,
     backgroundColor: PRIMARY_COLOR,
-    borderRadius: 20,
+    borderRadius: 14,
     elevation: 10,
     shadowColor: "#000",
     shadowOffset: {
